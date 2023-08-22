@@ -28,7 +28,7 @@ function App() {
         <Router>
           <Navbar title="Restaurants Review" logout={logout} user={user}/>
           <Routes>
-            <Route exact path='/' Component={RestaurantsList}/>
+            <Route exact path='/Restaurant_Review' Component={RestaurantsList}/>
             <Route exact path='/restaurants' Component={RestaurantsList}/>
             <Route exact path='restaurants/:id/review' element={<AddReview user={user}/>}/>
             <Route exact path='/restaurants/:id' element = {<Restaurants user={user}/>}/>
