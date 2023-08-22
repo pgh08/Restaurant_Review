@@ -110,7 +110,7 @@ function RestaurantsList(props){
                 </div>
                 
                 <div className="input-group col-lg-4 w-25">
-                    <select onChange={onChangeSearchCuisine}>
+                    <select class="form-select" aria-label="Default select example" onChange={onChangeSearchCuisine}>
                         {
                             cuisines.map((cuisine) => {
                                 return(
