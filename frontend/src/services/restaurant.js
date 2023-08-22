@@ -14,7 +14,7 @@ class RestaurantDataService{
     }
 
     createReview(data){
-        return fetch(`http://localhost:5000/api/v1/restaurants/review/`,{
+        return fetch(`https://restaurantreview-50ic.onrender.com/api/v1/restaurants/review/`,{
             method: "POST",
             body: JSON.stringify(data),
             headers: {
@@ -24,7 +24,7 @@ class RestaurantDataService{
     }
 
     updateReview(data){
-        return fetch(`http://localhost:5000/api/v1/restaurants/review/`,{
+        return fetch(`https://restaurantreview-50ic.onrender.com/api/v1/restaurants/review/`,{
             method: "PUT",
             body: JSON.stringify(data),
             headers: {
@@ -34,7 +34,7 @@ class RestaurantDataService{
     }
 
     deleteReview(id, userId){
-        fetch(`http://localhost:5000/api/v1/restaurants/review?id=${id}`,{
+        fetch(`https://restaurantreview-50ic.onrender.com/api/v1/restaurants/review?id=${id}`,{
             method: "DELETE",
             body: JSON.stringify({
                 user_id: userId
