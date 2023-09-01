@@ -1,35 +1,24 @@
-import mongodb from "mongodb";
+import reviewModel from '../models/Data.model.js';
+import UsersDAO from './UserDAO.js';
+import mongoose from 'mongoose';
 
-const ObjectId = mongodb.ObjectId;
-
-let reviews;
+const generate = mongoose.mongo;
+const reviews = reviewModel.reviews;
 
 export default class ReviewsDAO{
-    static async injectDB(conn){
-
-        if(reviews){
-            return;
-        }
-
-        try{
-            reviews = await conn.db(process.env.RESTREVIEWS_NS).collection("reviews");
-        }
-        catch(e){
-            console.error(`Unable to establish collection handles in userDAO: ${e}`);
-        }
-    }
-
-    static async addReview(restaurantId, user, review, date){
+    static async addReview(restaurantId, userEmail, review, date, userName){
         try{
             const reviewDoc = {
-                name: user.name,
-                user_id: user._id,
-                date: date,
+                email: userEmail,
                 text: review,
-                restaurant_id: new ObjectId(restaurantId)
+                date: date,
+                restaurant_id: restaurantId,
+                name: userName
             };
 
-            return await reviews.insertOne(reviewDoc);
+            const reviewData = await reviews.create(reviewDoc);
+            
+            return await UsersDAO.addReviewIdAndRestaurantId(userEmail, reviewData._id.toString(), restaurantId)
         }
         catch(e){
             console.error(`Unable to post review: ${e}`);
@@ -37,10 +26,10 @@ export default class ReviewsDAO{
         }
     }
 
-    static async updateReview(reviewId, userId, text, date){
+    static async updateReview(reviewId, userEmail, text, date){
         try{
             const updateResponse = await reviews.updateOne(
-                {user_id: userId, _id: new ObjectId(reviewId)},
+                {email: userEmail, _id: new generate.ObjectId(reviewId)},
                 {$set: {text: text, date: date}}
             );
 
@@ -52,13 +41,16 @@ export default class ReviewsDAO{
         }
     }
 
-    static async deleteReview(reviewId, userId){
+    static async deleteReview(reviewId, userEmail){
         try{
             const deleteResponse = await reviews.deleteOne({
-                _id: new ObjectId(reviewId),
-                user_id: userId 
+                _id: new generate.ObjectId(reviewId),
+                email: userEmail 
             })
-            return deleteResponse;
+            
+            const deleteFromUser = await UsersDAO.deleteReviewIdAndRestaurantId(userEmail, reviewId);
+
+            return deleteResponse && deleteFromUser;
         }
         catch(e){
             console.error(`Unable to delete review: ${e}`);

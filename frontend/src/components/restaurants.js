@@ -19,7 +19,6 @@ const Restaurants = (props) => {
     const getRestaurant = (id) => {
         RestaurantService.get(id)
         .then(response => {
-            console.log(response.data);
             setRestaurant(response.data.restaurant);
         })
         .catch(e => {
@@ -32,7 +31,7 @@ const Restaurants = (props) => {
     }, [params.id]);
 
     const deleteReview = (reviewId, index) => {
-        RestaurantService.deleteReview(reviewId, props.user.id)
+        RestaurantService.deleteReview(reviewId, props.userEmail)
         .then(response => {
             setRestaurant((prevState) => {
                 prevState.reviews.splice(index, 1);
@@ -40,6 +39,8 @@ const Restaurants = (props) => {
                     ...prevState
                 })
             })
+            props.updateReviewId(null);
+            props.showAlert(response.msg, response.status);
         })
         .catch(e => {
             console.log(e);
@@ -59,8 +60,8 @@ const Restaurants = (props) => {
                         <strong>Cuisine: </strong>{restaurant.cuisine}<br/>
                         <strong>Address: </strong>{restaurant.address.building},{restaurant.address.street},{restaurant.address.zipcode}
                     </p>
-                    <Link to={"/restaurants/"+params.id+"/review"} className="btn btn-primary">
-                        Add Review
+                    <Link to={"/restaurants/"+params.id+"/review"} state={{currentReview: props.reviewId}} className="btn btn-primary">
+                        {props.reviewId ? 'Edit your review' : 'Add new review'}
                     </Link>
                     <h4 className="mt-3" style={{fontWeight: "bold"}}>Reviews</h4>
                     <div className="row">
@@ -75,10 +76,11 @@ const Restaurants = (props) => {
                                                     <strong>User: </strong>{review.name}<br/>
                                                     <strong>Date: </strong>{review.date}
                                                 </p>
-                                                {props.user && props.user.id === review.user_id && 
+                                                {props.userEmail === review.email && 
+                                            
                                                     <div className="row">
-                                                        <Link onClick={() => deleteReview(review._id, index)} className="btn btn-primary col-lg-5 mx-1 mb-1">Delete</Link>
-                                                        <Link to={"/restaurants/" + params.id + "/review"} state={{currentReview: review}} className="btn btn-primary col-lg-5 mx-1 mb-1">Edit</Link>
+                                                        <Link onClick={() => deleteReview(review._id, index)} className="btn btn-primary col-lg-5 mx-1 mb-1">Delete</Link>      
+                                                        <Link to={"/restaurants/" + params.id + "/review"} state={{currentReview: review._id}} className="btn btn-primary col-lg-5 mx-1 mb-1">Edit</Link>
                                                     </div>
                                                 }
                                             </div>

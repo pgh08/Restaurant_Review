@@ -1,29 +1,12 @@
-import mongodb from "mongodb";
+import mongoose from "mongoose";
+import restaurantsModel from '../models/Data.model.js';
 
-const ObjectId = mongodb.ObjectId;
-
-let restaurants;
+const restaurants = restaurantsModel.restaurants;
+const generate = mongoose.mongo;
 
 export default class RestaurantsDAO{
-    static async injectDB(conn){
-        if(restaurants){
-            return;
-        }
-
-        try {
-            restaurants = await conn.db(process.env.RESTREVIEWS_NS).collection("restaurants");
-        }
-        catch(e){
-            console.error(`Unable to establish a connection handle in restaurantsDAO: ${e}`);
-        }
-    }
-
-    static async getRestaurants({
-        filters = null,
-        page = 0,
-        restaurantsPerPage = 20
-    } = {}) {
-        let query;
+    static async getRestaurants(filters = null, page = 0, restaurantsPerPage = 20) {
+        let query = {};
 
         if(filters){
             if("name" in filters){
@@ -40,28 +23,26 @@ export default class RestaurantsDAO{
             }
         }
 
-        let cursor;
-         
         try{
-            cursor = await restaurants.find(query);
-        }
-        catch(e){
-            console.error(`Unable to issue find command, ${e}`);
-            return {restaurantsList: [], totalNumRestaurants: 0};
-        }
+            let restaurantsList = [];
 
-        const displayCursor = cursor.limit(restaurantsPerPage).skip(restaurantsPerPage*page); 
+            await restaurants.find(query).limit(restaurantsPerPage).skip(page*restaurantsPerPage)
+            .then((res) => {
+                res.forEach(element => {
+                   restaurantsList.push(element); 
+                });
+            })
+            .catch((err) => {
+                console.error(`error : ${err}`);
+            })
 
-        try{
-            const restaurantsList = await displayCursor.toArray();
-            const totalNumRestaurants = await restaurants.countDocuments(query);
+            const totalNumRestaurants = restaurantsList.length;
 
             return {restaurantsList, totalNumRestaurants};
         }
         catch(e){
-            console.error(`Unable to convert cursor to array or problem counting documents, ${e}`);
-
-            return {restaurantsList: [], totalNumRestaurants: 0};
+            console.error(`Unable to fetch and query restaurants : ${e}`);
+            return {restaurantsList: {}, totalNumRestaurants: 0};
         }
     }
 
@@ -70,21 +51,21 @@ export default class RestaurantsDAO{
             const pipeline = [
                 {
                     $match: {
-                        _id: new ObjectId(id),
+                        _id: new generate.ObjectId(id),
                     },
                 },
                 {
                     $lookup: {
                         from: "reviews",
                         let: {
-                            id: "$_id",
+                            id: id,
                         },
 
                         pipeline: [
                             {
                                 $match: {
                                     $expr: {
-                                        $eq: ["$restaurant_id", "$$id"],
+                                        $eq: ["$restaurant_id", id],
                                     },
                                 },
                             },
@@ -102,8 +83,11 @@ export default class RestaurantsDAO{
                         reviews: "$reviews",
                     },
                 },
-            ]
-            return await restaurants.aggregate(pipeline).next();
+            ];
+            
+            const dataArray = await restaurants.aggregate(pipeline);
+
+            return dataArray[0];
         }
         catch(e){
             console.error(`Something went wrong in getRestaurantID: ${e}`);

@@ -1,59 +1,52 @@
 import React, {useState} from "react";
 import RestaurantService from "../services/restaurant.js";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 function AddReview(props){
 
-    const textStyle = {
-        fontSize: "1.3rem",
-        fontWeight: "bold",
-        display: "flex",
-        justifyContent: "center",
-    };
+    const [submitted, setSubmitted] = useState(false);
 
     const params = useParams();
     const location = useLocation();
+    const navigate = useNavigate();
     
     let initialReviewState = "";
-    
     let editing = false;
 
     if(location.state && location.state.currentReview){
         editing = true;
-        initialReviewState = location.state.currentReview.text;
     }
     
     const [review, setReview] = useState(initialReviewState);
-    const [submitted, setSubmitted] = useState(false);
-
+    
     const handleInputChange = (event) => {
         setReview(event.target.value);
     }
 
     const saveReview = () =>{
-        var data = {
-            text: review,
-            name: props.user.name,
-            user_id: props.user.id,
-            restaurant_id: params.id
-        }
-
         if(editing){
-            data.review_id = location.state.currentReview._id;
-            RestaurantService.updateReview(data)
+            const review_id = location.state.currentReview;
+            RestaurantService.updateReview(review_id, review, props.userEmail)
             .then((response) => {
                 setSubmitted(true);
-                console.log(response.data);
+                props.showAlert(response.msg, response.status);
             })
             .catch((e) => {
                 console.log(e);
             });
         }
         else{
-            RestaurantService.createReview(data)
+            RestaurantService.createReview(params.id, review, props.userEmail, props.userName)
             .then((response) => {
-                setSubmitted(true);
-                console.log(response.data);
+                if(response.status === 'danger'){
+                    props.updateReviewId(response.reviewId);
+                    props.showAlert(response.msg, response.status);
+                    navigate(-1);
+                }
+                else{
+                    setSubmitted(true);
+                    props.showAlert(response.msg, response.status);
+                }
             })
             .catch((e) => {
                 console.log(e);
@@ -63,7 +56,7 @@ function AddReview(props){
 
     return(
         <div className="container">
-            {props.user ? (
+            {props.userName ? (
                 <div className="submit-form">
                     { submitted ? (
                         <div>
@@ -83,8 +76,9 @@ function AddReview(props){
                     )}
                 </div>
             ) : (
-                <div style={textStyle}>
-                    Please Login
+                <div className="container d-flex flex-column align-items-center mt-5">
+                    <p className="fs-2 fw-bold">Please Login</p>
+                    <Link type="submit" className="btn btn-primary fs-4" to={'/restaurants/login'}>Login</Link>
                 </div>
             )}
         </div>
