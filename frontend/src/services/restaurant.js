@@ -1,8 +1,6 @@
-import http from '../http-common.js';
-
 class RestaurantDataService{
     async getAll(page){
-        const response = await fetch(`http://localhost:5000/api/v1/restaurants?page=${page}`,{
+        const response = await fetch(`https://restaurantreview-up2l.onrender.com/api/v1/restaurants?page=${page}`,{
             method: 'GET',
             headers:{
                 'Content-Type': 'application/json'
@@ -13,11 +11,18 @@ class RestaurantDataService{
     }
 
     async get(id){
-        return http.get(`/id/${id}`);
+        const response = await fetch(`https://restaurantreview-up2l.onrender.com/api/v1/restaurants/id/${id}`,{
+            method: 'GET',
+            headers:{
+                'Content-Type': 'application/json'
+            },
+        });
+
+        return await response.json();
     }
 
     async find(query, by = "name", page = 0){
-        const response = await fetch(`http://localhost:5000/api/v1/restaurants?${by}=${query}&page=${page}`,{
+        const response = await fetch(`https://restaurantreview-up2l.onrender.com/api/v1/restaurants?${by}=${query}&page=${page}`,{
             method: 'GET',
             headers:{
                 'Content-Type': 'applicatoin/json'
@@ -28,7 +33,7 @@ class RestaurantDataService{
     }
 
     async createReview(restaurantId, review, userEmail, userName){
-        const response = await fetch(`http://localhost:5000/api/v1/restaurants/review/`,{
+        const response = await fetch(`https://restaurantreview-up2l.onrender.com/api/v1/restaurants/review/`,{
             method: "POST",
             body: JSON.stringify({
                 restaurant_id: restaurantId,
@@ -45,7 +50,7 @@ class RestaurantDataService{
     }
 
     async updateReview(reviewId, review, userEmail){
-        const response = await fetch(`http://localhost:5000/api/v1/restaurants/review/`,{
+        const response = await fetch(`https://restaurantreview-up2l.onrender.com/api/v1/restaurants/review/`,{
             method: "PUT",
             body: JSON.stringify({
                 review_id: reviewId,
@@ -60,7 +65,7 @@ class RestaurantDataService{
     }
 
     async deleteReview(id, userEmail){
-        const response = await fetch(`http://localhost:5000/api/v1/restaurants/review?id=${id}`,{
+        const response = await fetch(`https://restaurantreview-up2l.onrender.com/api/v1/restaurants/review?id=${id}`,{
             method: "DELETE",
             body: JSON.stringify({
                 email: userEmail
@@ -72,12 +77,19 @@ class RestaurantDataService{
         return await response.json();
     }
 
-    getCuisines(){
-        return http.get(`/cuisines`);
+    async getCuisines(){
+        const response = await fetch(`https://restaurantreview-up2l.onrender.com/api/v1/restaurants/cuisines/`,{
+            method: 'GET',
+            headers:{
+                'Content-Type': 'application/json'
+            },
+        });
+
+        return await response.json();
     }
 
     async loginUser(userEmail, password){
-        const response = await fetch('http://localhost:5000/api/v1/restaurants/login', {
+        const response = await fetch('https://restaurantreview-up2l.onrender.com/api/v1/restaurants/login', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json"
@@ -92,7 +104,7 @@ class RestaurantDataService{
     }
 
     async registerUser(userName, userEmail, password){
-        const response = await fetch('http://localhost:5000/api/v1/restaurants/register', {
+        const response = await fetch('https://restaurantreview-up2l.onrender.com/api/v1/restaurants/register', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json"
@@ -108,7 +120,7 @@ class RestaurantDataService{
     }
     
     async userDashboard(userEmail){
-        const response = await fetch('http://localhost:5000/api/v1/restaurants/dashboard', {
+        const response = await fetch('https://restaurantreview-up2l.onrender.com/api/v1/restaurants/dashboard', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

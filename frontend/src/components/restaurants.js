@@ -19,7 +19,7 @@ const Restaurants = (props) => {
     const getRestaurant = (id) => {
         RestaurantService.get(id)
         .then(response => {
-            setRestaurant(response.data.restaurant);
+            setRestaurant(response.restaurant);
         })
         .catch(e => {
             console.log(e);

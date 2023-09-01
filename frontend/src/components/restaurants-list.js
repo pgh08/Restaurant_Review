@@ -50,7 +50,7 @@ function RestaurantsList(props) {
     const retrieveCuisines = () => {
         RestaurantService.getCuisines()
             .then(response => {
-                setCuisine(["All Cuisines"].concat(response.data));
+                setCuisine(["All Cuisines"].concat(response));
             })
             .catch(e => {
                 console.log(e);
